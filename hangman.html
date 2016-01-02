@@ -1,0 +1,163 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+	<title>Hangman!</title>
+	<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+	<meta name="generator" content="Geany 1.26" />
+	<style>
+		h1 {
+			text-align : center;
+		}
+		pre {
+			text-align : center;
+			font : 25px arial, sans-serif;
+			background-color: #ccffff;
+			margin-left: 25%;
+			width: 50%;
+		}
+		h2#msg {
+			text-align : center;
+			visibility : hidden;
+		}
+		p {
+			text-align : center;
+		}
+		form {
+			text-align : center;
+		}
+		div {
+			text-align : center;
+		}
+		h3#guessed {
+			text-align : center;
+		}
+		
+	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script>
+		var words = {
+			"sports" : ["football", "golf", "hockey", "basketball", "badminton"],
+			"animals" : ["panda", "goat", "lion", "horse", "chimp"],
+			"technology" : ["ethernet", "internet", "transistor", "central processing unit", "general packet radio service"],
+			"food" : ["rice", "cookie", "bread", "pizza", "cheese"],
+			"colours" : ["red", "yellow", "blue", "greeen", "black"],
+		};
+		
+		var word;
+		var display;
+		var counter = 0;
+		
+		function chooseword() {		
+			var box = document.getElementById("category");
+			var cat = box.options[box.selectedIndex].value;			
+			document.getElementById("msg").style.visibility = "hidden";
+			word = words[cat][Math.floor(Math.random() * words[cat].length)];
+			display = "_".repeat(word.length);
+			document.getElementById("guessed").innerHTML = "Guessed letters: ";
+			document.getElementById("tries").innerHTML = "Tries left: 5";
+			update("a");
+			update("e");
+			update("i");
+			update("o");
+			update("u");
+			update(" ");
+		}
+		
+		function update(letter){
+			var updated = 0;
+			for (var i = 0; i < word.length; i++) {
+				if (word[i] == letter && display[i] == "_") {
+					display = display.substring(0, i) + word[i] + display.substring(i+1); // I hate JavaScript!
+					updated = 1;
+				}
+			}
+			document.getElementById("word").innerHTML = formatStr(display);
+			document.getElementById("guessed").innerHTML += letter + " ";
+			return updated;
+		}
+		
+		function guessLetter() {
+			var letter = document.getElementById("letter").value;
+			var msg = document.getElementById("msg");
+			var tries = document.getElementById("tries");
+			document.getElementById("letter").value = "";
+			msg.style.visibility = "hidden";
+			
+			if (!update(letter)) {
+				counter++;
+				msg.style.visibility = "visible";
+				msg.style.color = "red";
+				msg.innerHTML = "Wrong guess! Try again."
+			}
+			if (counter == 5) {
+				msg.style.visibility = "visible";
+				msg.style.color = "red";
+				msg.innerHTML = "You lost :-(";
+				reset();
+			}
+			tries.innerHTML = "Tries left: " + (5 - counter).toString();
+			if (display == word) {
+				msg.style.visibility = "visible";
+				msg.style.color = "green";
+				msg.innerHTML = "You won!!";
+				reset();
+			}
+			return false; // I don't really know how this works
+		}
+		
+		function formatStr(str) {
+			newStr = "";
+			for (var i = 0; i < str.length-1; ++i) {
+				newStr = newStr.concat(str[i]).concat(" ");
+			}
+			newStr = newStr.concat(str[str.length-1]);
+			return newStr;
+		}
+		
+		function reset() {
+			var box = document.getElementById("category");
+			box.selectedIndex=0;
+			word = null;
+			display = "";
+			counter = 0;
+		}
+		$(document).ready(function() {
+			$("#letter").keyup(function() {
+				guessLetter();
+			});
+		});
+	</script>
+</head>
+
+<body>
+	<br>
+	<h1>Play Hangman!</h1>
+	<pre>
+	<p id="word">Choose a category</p>
+	</pre>
+	<h3 id="guessed"></h3>
+	<h2 id="msg"></h2>
+	<div>
+		Category: 
+		<select id="category" onchange="chooseword();">
+			<option>--</option>
+			<option value="sports">Sports</option>
+			<option value="animals">Animals</option>
+			<option value="technology">Technology</option>
+			<option value="food">Food</option>
+			<option value="colours">Colours</option>
+		</select>
+	</div>
+	<form>
+		<br> Guess a letter: 
+		<input type="text" id="letter">
+		<br>
+	</form>
+	<br>
+	<p id="tries"></p>
+
+</html>
